@@ -699,24 +699,6 @@
       </div>
     </div>
 
-    <!-- Plataforma -->
-    <div class="step">
-      <div class="step-header">
-        <div class="step-num">5</div>
-        <div>
-          <div class="step-title">Plataforma de anúncio <span class="req">*</span></div>
-          <div class="step-sub">Pode marcar mais de uma</div>
-        </div>
-      </div>
-      <div class="tags" id="plat">
-        <div class="tag" onclick="toggleTag('plat', this, 'meta')">📘 Meta Ads (Facebook/Instagram)</div>
-        <div class="tag" onclick="toggleTag('plat', this, 'google')">🔍 Google Ads</div>
-        <div class="tag" onclick="toggleTag('plat', this, 'tiktok')">🎵 TikTok Ads</div>
-        <div class="tag" onclick="toggleTag('plat', this, 'youtube')">▶️ YouTube Ads</div>
-        <div class="tag" onclick="toggleTag('plat', this, 'kwai')">🎬 Kwai Ads</div>
-        <div class="tag" onclick="toggleTag('plat', this, 'nao_sei')">🤔 Não sei / quero sugestão</div>
-      </div>
-    </div>
 
     <!-- ── BLOCO 4: PÚBLICO ── -->
     <div class="section-divider"><span>Público e Segmentação</span></div>
@@ -968,7 +950,7 @@
   /* ── State ── */
   const state = {
     obj:       null,
-    plat:      [],
+    plat:      ['meta'],
     segmento:  [],
     criativos: [],
     historico: null,
@@ -1048,7 +1030,6 @@
       state.segmento && state.segmento.length > 0,
       !!document.getElementById('site').value.trim(),
       !!state.obj,
-      state.plat && state.plat.length > 0,
       !!document.getElementById('publico').value.trim(),
       !!document.getElementById('regiao').value.trim(),
       !!document.getElementById('budget').value.trim(),
@@ -1098,11 +1079,7 @@
       return false;
     }
 
-    if (!state.plat || !state.plat.length) {
-      document.getElementById('plat').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      alert('Por favor, selecione ao menos uma plataforma de anúncio (passo 5).');
-      return false;
-    }
+
 
     if (!ok) {
       const firstErr = document.querySelector('.field-error');
