@@ -1118,58 +1118,95 @@
   };
 
   /* ── Submit ── */
-  function enviar() {
+  async function enviar() {
     if (!validate()) return;
 
     const btn = document.getElementById('btn-submit');
     btn.disabled = true;
     btn.textContent = 'Enviando...';
 
-    setTimeout(() => {
-      const nome = document.getElementById('nome').value.trim();
-      const empresa = document.getElementById('empresa').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const whatsapp = document.getElementById('whatsapp').value.trim();
-      const site = document.getElementById('site').value.trim();
-      const descricao = document.getElementById('descricao').value.trim();
-      const ticket = document.getElementById('ticket').value.trim();
-      const tipo_oferta = document.getElementById('tipo_oferta').value;
-      const regiao = document.getElementById('regiao').value.trim();
-      const budget = document.getElementById('budget').value.trim();
-      const inicio = document.getElementById('inicio').value.trim();
-      const publico = document.getElementById('publico').value.trim();
-      const genero = document.getElementById('genero').value;
-      const idadeMin = document.getElementById('idade_min').value;
-      const idadeMax = document.getElementById('idade_max').value;
+    const nome       = document.getElementById('nome').value.trim();
+    const empresa    = document.getElementById('empresa').value.trim();
+    const email      = document.getElementById('email').value.trim();
+    const whatsapp   = document.getElementById('whatsapp').value.trim();
+    const site       = document.getElementById('site').value.trim();
+    const descricao  = document.getElementById('descricao').value.trim();
+    const ticket     = document.getElementById('ticket').value.trim();
+    const tipo_oferta= document.getElementById('tipo_oferta').value;
+    const regiao     = document.getElementById('regiao').value.trim();
+    const budget     = document.getElementById('budget').value.trim();
+    const inicio     = document.getElementById('inicio').value.trim();
+    const publico    = document.getElementById('publico').value.trim();
+    const genero     = document.getElementById('genero').value;
+    const idadeMin   = document.getElementById('idade_min').value;
+    const idadeMax   = document.getElementById('idade_max').value;
+    const cpa        = document.getElementById('cpa_esperado').value.trim();
+    const volume     = document.getElementById('volume_esperado').value.trim();
+    const meta_obs   = document.getElementById('meta_obs').value.trim();
+    const extra      = document.getElementById('extra').value.trim();
+    const hist_det   = document.getElementById('historico_detalhe').value.trim();
 
-      document.getElementById('success-nome').textContent = nome.split(' ')[0];
+    const payload = {
+      access_key: 'f4e2c14c-720f-4782-b09c-da4e0dcb241b',
+      subject: `Novo briefing — ${nome} (${empresa})`,
+      from_name: 'Reis Agency — Briefing',
+      nome, empresa, email, whatsapp,
+      segmento: (state.segmento || []).join(', ') || '—',
+      site, descricao, ticket, tipo_oferta,
+      objetivo: OBJ_LABELS[state.obj] || state.obj,
+      regiao,
+      orcamento: `R$ ${budget} (${state.budgetType === 'dia' ? 'por dia' : 'por mês'})`,
+      inicio,
+      genero,
+      faixa_etaria: idadeMin && idadeMax ? `${idadeMin}–${idadeMax} anos` : '—',
+      publico,
+      criativos: (state.criativos || []).join(', ') || '—',
+      experiencia: HIST_LABELS[state.historico] || '—',
+      historico_detalhe: hist_det,
+      cpa_esperado: cpa,
+      volume_esperado: volume,
+      meta_obs, extra,
+      origem: state.origem || '—',
+    };
 
-      const rows = [
-        ['Nome', nome],
-        ['Empresa', empresa],
-        ['E-mail', email],
-        ['WhatsApp', whatsapp],
-        ['Segmento', (state.segmento || []).join(', ') || '—'],
-        ['Produto / Site', site],
-        ['Objetivo', OBJ_LABELS[state.obj] || state.obj],
-        ['Plataformas', (state.plat || []).map(p => PLAT_LABELS[p] || p).join(', ')],
-        ['Público', [genero, idadeMin && idadeMax ? `${idadeMin}–${idadeMax} anos` : ''].filter(Boolean).join(', ')],
-        ['Região', regiao],
-        ['Orçamento', `R$ ${budget} (${state.budgetType === 'dia' ? 'por dia' : 'por mês'})`],
-        ['Experiência', HIST_LABELS[state.historico] || '—'],
-      ];
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error('Falha no envio');
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Enviar briefing →';
+      alert('Ocorreu um erro ao enviar. Tente novamente.');
+      return;
+    }
 
-      const rowsEl = document.getElementById('success-rows');
-      rowsEl.innerHTML = rows.map(([k, v]) => `
-        <div class="success-row">
-          <span class="success-row-key">${k}</span>
-          <span class="success-row-val">${v || '—'}</span>
-        </div>`).join('');
+    document.getElementById('success-nome').textContent = nome.split(' ')[0];
 
-      document.getElementById('form-body').style.display = 'none';
-      document.getElementById('success').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 600);
+    const rows = [
+      ['Nome', nome],
+      ['Empresa', empresa],
+      ['E-mail', email],
+      ['WhatsApp', whatsapp],
+      ['Segmento', (state.segmento || []).join(', ') || '—'],
+      ['Produto / Site', site],
+      ['Objetivo', OBJ_LABELS[state.obj] || state.obj],
+      ['Público', [genero, idadeMin && idadeMax ? `${idadeMin}–${idadeMax} anos` : ''].filter(Boolean).join(', ')],
+      ['Região', regiao],
+      ['Orçamento', `R$ ${budget} (${state.budgetType === 'dia' ? 'por dia' : 'por mês'})`],
+      ['Experiência', HIST_LABELS[state.historico] || '—'],
+    ];
+
+    document.getElementById('success-rows').innerHTML = rows.map(([k, v]) =>
+      `<div class="success-row"><span class="success-row-key">${k}</span><span class="success-row-val">${v || '—'}</span></div>`
+    ).join('');
+
+    document.getElementById('form-body').style.display = 'none';
+    document.getElementById('success').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   /* ── Init progress ── */
